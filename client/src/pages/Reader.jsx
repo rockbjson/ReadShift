@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useParagraphTracker } from '../hooks/useParagraphTracker';
@@ -16,6 +16,10 @@ const Reader = () => {
   const [sharpness, setSharpness] = useState(null);
   const [showCheckIn, setShowCheckIn] = useState(true);
   const [readingState, setReadingState] = useState('default');
+  const [showReflection, setShowReflection] = useState(false);
+  const [postRating, setPostRating] = useState(null);
+  const [reflectionSubmitted, setReflectionSubmitted] = useState(false);
+  const lastParagraphRef = useRef(null);
 
   const { log } = useEventLogger(sessionId);
 
@@ -34,6 +38,23 @@ const Reader = () => {
     fetchArticle();
   }, [id, navigate]);
 
+  // Watch for last paragraph entering viewport
+  useEffect(() => {
+    if (!lastParagraphRef.current || !sessionId) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShowReflection(true);
+        }
+      },
+      { threshold: 0.8 }
+    );
+
+    observer.observe(lastParagraphRef.current);
+    return () => observer.disconnect();
+  }, [lastParagraphRef.current, sessionId]);
+
   // Start session after check-in
   const startSession = async (sharpnessScore) => {
     try {
@@ -45,12 +66,26 @@ const Reader = () => {
       setSharpness(sharpnessScore);
       setShowCheckIn(false);
 
-      // Auto-enable focused mode for low sharpness
       if (sharpnessScore <= 2) {
         setReadingState('focused');
       }
     } catch (err) {
       console.error('Session start error:', err);
+    }
+  };
+
+  // Submit post-read reflection
+  const submitReflection = async (rating) => {
+    setPostRating(rating);
+    setReflectionSubmitted(true);
+
+    try {
+      await api.patch(`/sessions/${sessionId}/end`, {
+        post_rating: rating,
+        completed: true,
+      });
+    } catch (err) {
+      console.error('Reflection submit error:', err);
     }
   };
 
@@ -69,12 +104,10 @@ const Reader = () => {
     else if (type === 'slow' && readingState === 'skimming') setReadingState('default');
   }, [log, readingState]);
 
-  // Activate tracking hooks
   useParagraphTracker(handleDwell);
   useRereadDetector(handleReread);
   useScrollVelocity(handleVelocity);
 
-  // Background and font size per reading state
   const stateStyles = {
     default: 'bg-stone-50',
     focused: 'bg-amber-50',
@@ -177,16 +210,77 @@ const Reader = () => {
         </p>
 
         <div className="flex flex-col gap-6">
-          {paragraphs.map((para) => (
+          {paragraphs.map((para, index) => (
             <p
               key={para.id}
               data-paragraph-id={para.id}
+              ref={index === paragraphs.length - 1 ? lastParagraphRef : null}
               className={`text-gray-800 font-serif transition-all duration-300 ${bodySize[readingState]}`}
             >
               {para.text}
             </p>
           ))}
         </div>
+
+        {/* Post-read reflection card */}
+        {showReflection && (
+          <div className="mt-16 border-t border-gray-200 pt-10">
+            {!reflectionSubmitted ? (
+              <div className="text-center">
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-4">
+                  After you read
+                </p>
+                <p className="text-lg font-semibold text-gray-900 mb-6">
+                  How was that read?
+                </p>
+                <div className="flex gap-3 justify-center mb-4">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => submitReflection(n)}
+                      className="w-12 h-12 border border-gray-200 rounded-lg text-base font-medium text-gray-700 hover:bg-teal-800 hover:text-white hover:border-teal-800 transition-colors"
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-between max-w-xs mx-auto mb-8">
+                  <span className="text-xs text-gray-400">Poor</span>
+                  <span className="text-xs text-gray-400">Excellent</span>
+                </div>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="text-sm text-gray-400 hover:text-gray-600"
+                >
+                  Skip — view insights
+                </button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-sm font-medium text-gray-900 mb-2">
+                  Session saved
+                </p>
+                <p className="text-sm text-gray-400 mb-6">
+                  Your reading data has been recorded.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-teal-800 text-white px-6 py-2 rounded text-sm font-medium hover:bg-teal-900"
+                  >
+                    View insights
+                  </button>
+                  <button
+                    onClick={() => navigate('/')}
+                    className="border border-gray-200 text-gray-600 px-6 py-2 rounded text-sm font-medium hover:border-gray-300"
+                  >
+                    Back to home
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
