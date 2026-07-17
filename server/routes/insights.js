@@ -125,11 +125,11 @@ router.get('/article/:sessionId', authenticateToken, async (req, res) => {
       const rereadCount = rereadEvents.length;
 
       let engagement = 'not_reached';
-      if (totalDwell > 0) {
-        if (rereadCount >= 2) engagement = 'reread';
-        else if (totalDwell > 10) engagement = 'normal';
+        if (totalDwell > 0) {
+        if (rereadCount >= 1) engagement = 'reread';
+        else if (totalDwell > 2) engagement = 'normal';
         else engagement = 'skimmed';
-      }
+        }
 
       return {
         id: p.id,
