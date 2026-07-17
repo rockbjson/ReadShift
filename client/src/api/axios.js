@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'https://readshift-production.up.railway.app/api',
 });
 
 // Attach JWT token to every request automatically
