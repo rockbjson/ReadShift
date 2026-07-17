@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import Reader from './pages/Reader';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
@@ -15,6 +16,14 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/read/:id"
+          element={
+            <ProtectedRoute>
+              <Reader />
             </ProtectedRoute>
           }
         />
