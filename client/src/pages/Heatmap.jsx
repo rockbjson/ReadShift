@@ -75,26 +75,26 @@ const Heatmap = () => {
         </p>
 
         {/* Summary strip */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 flex gap-6">
-          <div className="text-center">
-            <p className="text-2xl font-semibold text-gray-900">
-              {Math.round((summary.reached / summary.totalParagraphs) * 100)}%
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Read</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-semibold text-gray-900">
-              {summary.reread}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Re-read</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-semibold text-gray-900">
-              {summary.dropOffIndex === -1 ? '—' : `¶${summary.dropOffIndex + 1}`}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Drop-off</p>
-          </div>
-        </div>
+            <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 flex gap-6">
+            <div className="text-center">
+                <p className="text-2xl font-semibold text-gray-900">
+                {Math.round((summary.reached / summary.totalParagraphs) * 100)}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Read</p>
+            </div>
+            <div className="text-center">
+                <p className="text-2xl font-semibold text-gray-900">
+                {summary.reread}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Re-read</p>
+            </div>
+            <div className="text-center">
+                <p className="text-2xl font-semibold text-gray-900">
+                {summary.dropOffIndex === -1 ? '—' : `¶${summary.dropOffIndex + 1}`}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Drop-off</p>
+            </div>
+            </div>
 
         {/* Two column layout */}
         <div className="flex gap-4">
