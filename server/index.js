@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const articleRoutes = require('./routes/articles');
 const eventRoutes = require('./routes/events');
 const sessionRoutes = require('./routes/sessions');
+const insightRoutes = require('./routes/insights');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/insights', insightRoutes);
 
 // Test route
 app.get('/', (req, res) => {
